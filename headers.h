@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <omp.h>
 #include<conio.h>
@@ -12,6 +13,7 @@
 #define Mconc 10
 #define Mreac 8
 
+using namespace std;
 
 /*
 множитель перед omega с чертой
@@ -83,3 +85,5 @@ double fy4(double qc, double teta1, double teta2, double yy1, double z1, double 
 double ft1(double qc, double teta1, double teta2, double yy1, double z1, double z2, double tempK);
 
 double ft2(double qc, double teta1, double teta2, double yy1, double z1, double z2, double tempK);
+
+void print_to_file(const char *fname, double array[], int size);

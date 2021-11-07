@@ -193,3 +193,15 @@ double ft2(double qc, double teta1, double teta2, double yy1, double z1, double 
 		+ w4(qc, teta1, teta2, yy1, z1, z2, tempK) - 2 * w5(qc, teta1, teta2, yy1, z1, z2, tempK))
 		- Sk(qc) * w7(qc, teta1, teta2, yy1, z1, z2, tempK) / phi0;
 }
+
+void print_to_file(const char *fname, double array [], int size) {
+	// вывод массива в текстовый файл
+	FILE* file;
+
+	if ((file = fopen(fname, "w")) == NULL) {
+		exit(1);
+	}
+	for (int i = 0; i < size; i++) {
+		fprintf(file, "%5.2d \t %11.6f \n", i, array[i]);
+	}
+}

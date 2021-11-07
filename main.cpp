@@ -1,9 +1,7 @@
-#include <stdio.h>
-#include <omp.h>
+#include "headers.h"
+
+using namespace std;
 
 int main() {
-    #pragma omp parallel
-    {
-        printf("thread %i\n", omp_get_thread_num());
-    }
+    return 0;
 }
