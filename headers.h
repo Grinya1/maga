@@ -87,3 +87,10 @@ double ft1(double qc, double teta1, double teta2, double yy1, double z1, double 
 double ft2(double qc, double teta1, double teta2, double yy1, double z1, double z2, double tempK);
 
 void print_to_file(const char *fname, double array[], int size);
+
+struct Results {
+	double teta[N];
+	double y[Mconc][N];
+};
+
+Results calculation();
