@@ -172,6 +172,7 @@ Results calculation() {
 		teta[i] = TT;
 	}
 	for (int m = 0; m < M; m++) { 
+	#pragma omp parallel for
 		for (int i = 0; i < N; i++) {
 			y[m][i] = 0.;
 			y[1][i] = 1.0;
@@ -186,11 +187,11 @@ Results calculation() {
 		y[9][i] = qc0;
 	}
 
-	double t = 0.;
+	//double t = 0.;
 
 	//while (t < TMAX) {
-		#pragma omp parallel for
-	for (int o=0; o<TMAX/tau; o++){
+	//#pragma omp parallel for
+	for (int o=0; o<100000; o++){
 		
 		//граничные условия
 		mu[0] = mu[1];
@@ -209,39 +210,41 @@ Results calculation() {
 		teta[N - 1] = teta[N - 2];
 
 		// считаю стефановский поток
-		mu[1] = 0.;
+		//mu[1] = 0.;
 		double hh=h*h;
 		double h_tile_c0_gam0=h * tile * c0 / gam0;
 		
 		#pragma omp parallel for
-		for (int i = 2; i <= N - 1; i++) {
-			double hhii=i * hh * i;
-			double hhi_1i_1=(i-1) * hh * (i-1);
-			
-			mu[i] = (1/hhii) * (hhi_1i_1 * mu[i - 1] + h_tile_c0_gam0 *
-			(-w1(y[9][i - 1], y[5][i - 1], y[6][i - 1], y[1][i - 1], y[7][i - 1], y[8][i - 1], teta[i - 1])
-			+ w3(y[9][i - 1], y[5][i - 1], y[6][i - 1], y[1][i - 1], y[7][i - 1], y[8][i - 1], teta[i - 1])
-			+ w5(y[9][i - 1], y[5][i - 1], y[6][i - 1], y[1][i - 1], y[7][i - 1], y[8][i - 1], teta[i - 1]))
-			* hhi_1i_1);
-	}
-
+				for (int i = 2; i <= N - 1; i++) {
+					double hh_ii=i * hh * i ;
+					double hh_i_1i_1=(i-1) * hh * (i-1) ;
+					
+			mu[i] = (1 / hh_ii) * (hh_i_1i_1* mu[i - 1] + h_tile_c0_gam0 *
+				(-w1(y[9][i - 1], y[5][i - 1], y[6][i - 1], y[1][i - 1], y[7][i - 1], y[8][i - 1], teta[i - 1])
+				+ w3(y[9][i - 1], y[5][i - 1], y[6][i - 1], y[1][i - 1], y[7][i - 1], y[8][i - 1], teta[i - 1])
+				+ w5(y[9][i - 1], y[5][i - 1], y[6][i - 1], y[1][i - 1], y[7][i - 1], y[8][i - 1], teta[i - 1]))
+				* hh_i_1i_1);
+		}
+	
 		//считаю концентрации
 		double tau_e=tau*e;
 		double tau_ek=tau/ek;
-		double h_1=1.0 / (h);
-	  for (int m = 0; m < M; m++) {
-		#pragma omp parallel for
+		double h_1=1.0 / h;
+    for (int m = 0; m < M; m++) {
+		//#pragma omp parallel for 
 		for (int i = 1; i < N-1; i++) {
+			
+
 			f[1] = fy1(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
 			f[2] = fy2(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
 			f[3] = fy3(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
 			f[4] = fy4(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
-			double hhi_05i_05=1.0 / ((i - 0.5) * hh * (i - 0.5) );
-			double hhii1=i * hh * i;
-			double hhi_1i_11=(i-1) * hh * (i-1);
-			y_new[m][i] = y[m][i] + tau_e *hhi_05i_05 * (1.0 / h) * (hhii1 * (y[m][i + 1] - y[m][i]) / h - hhi_1i_11 * (y[m][i] - y[m][i - 1]) / h)
-				- tau_e * hhi_05i_05 * (h_1) * (hhii1 * mu[i] * 0.5 * (y[m][i + 1] + y[m][i]) - hhi_1i_11 * mu[i - 1] * (y[m][i] + y[m][i - 1]))
-				+ f[m] * tau_ek;
+		//	double hh_ii1=i * hh * i ;
+		//	double hh_ii05=(i-0.5) * hh * (i-0.5) ;
+		//	double hh_i_1i_11=(i-1) * hh * (i-1) ;
+			y_new[m][i] = y[m][i] + tau_e * (1.0 / ((i-0.5) * hh * (i-0.5))) * h_1* (i * hh * i * (y[m][i + 1] - y[m][i]) / h -(i-1) * hh * (i-1)* (y[m][i] - y[m][i - 1]) / h)
+				- tau_e * (1.0 / ((i-0.5) * hh * (i-0.5))) * h_1 * (i * hh * i* mu[i] * 0.5 * (y[m][i + 1] + y[m][i]) - (i-1) * hh * (i-1) * mu[i - 1] * (y[m][i] + y[m][i - 1]))
+				+ f[m] *tau_ek;
 		}
 	  }
 
@@ -249,27 +252,34 @@ Results calculation() {
 		double c0_ck_T_op=c0 / ck / T_op;
 		double tau_tile=tau / tile;
 		double tau_f0=tau * f[0];
-		#pragma omp parallel for 
-		for (int i = 1; i < N - 1; i++) {			
+	//	#pragma omp parallel for 
+		for (int i = 1; i < N - 1; i++) {
+			
 			f[0] = c0_ck_T_op * (qp[1] * w1(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i])
 			+ qp[2] * w2(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i])
 			+ qp[3] * w3(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i])
 			+ qp[4] * w4(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i])
 			+ qp[5] * w5(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]));
 
-			teta_new[i] = teta[i] + tau_tile* (1.0 / ((i - 0.5) * hh* (i - 0.5) )) * h_1 * (hh * i  * i * (teta[i + 1] - teta[i]) / h - hh * (i - 1) *  (i - 1) * (teta[i] - teta[i - 1]) / h) + tau_f0;
+			teta_new[i] = teta[i] + tau_tile * (1.0 / ((i - 0.5) * hh * (i - 0.5) )) * h_1 * (hh * i  * i * (teta[i + 1] - teta[i]) / h - hh * (i - 1) * (i - 1) * (teta[i] - teta[i - 1]) / h) + tau_f0;
+			//cout << f[0] << endl;
 		}
-		#pragma omp parallel for
+
+	//	#pragma omp parallel for
 		for (int i = 1; i < N-1; i++) teta[i] = teta_new[i];
 
 		for (int m = 0; m < M; m++) {
+		//	#pragma omp parallel for
 			for (int i = 1; i < N-1; i++) {
 				y[m][i] = y_new[m][i];
 			}
 		}
 
 		for (int m = 5; m < 10; m++) {
+	//		#pragma omp parallel for
 			for (int i = 1; i < N - 1; i++) {
+				
+	
 				f[5] = ft1(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
 				f[6] = ft2(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
 				f[7] = fz1(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
@@ -291,6 +301,8 @@ Results calculation() {
 		teta[N - 1] = teta[N - 2];
 
 		for (int m = 5; m < 10; m++) {
+	//		#pragma omp parallel for
+	
 			for (int i = 0; i < N-1; i++) {
 				y[m][i] = y_new[m][i];
 			}
@@ -299,11 +311,13 @@ Results calculation() {
 	}
 
 	Results results;
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for (int i=0; i<N; i++){
 		results.teta[i] = teta[i] * T_op - 273.0;
 	}
 	for (int i=0; i<Mconc; i++){
+	//	#pragma omp parallel for
+	
 		for (int j=0; j<N; j++){
 			results.y[i][j] = y[i][j];
 		}
