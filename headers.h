@@ -9,7 +9,7 @@
 #include<string.h>
 
 #define _CRT_SECURE_NO_WARNINGS
-#define N 120
+#define N 12
 #define M 5
 #define Mconc 10
 #define Mreac 8
