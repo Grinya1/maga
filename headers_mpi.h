@@ -41,4 +41,4 @@ struct Results {
 	double teta[N];
 	double y[Mconc][N];
 };
-Results calculation();
+Results calculation(int numproc, int rank);

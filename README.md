@@ -17,4 +17,4 @@
 
 254
 
-g++ mpi_test.cpp -L"C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x64" -I"C:\Program Files (x86)\Microsoft SDKs\MPI\Include" -o mpi_test.exe -lmsmpi
+g++ main_mpi.cpp functions_mpi.cpp -L"C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x64" -I"C:\Program Files (x86)\Microsoft SDKs\MPI\Include" -o main_mpi.exe -lmsmpi
