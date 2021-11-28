@@ -4,9 +4,11 @@ using namespace std;
 
 int main() {
     double start = omp_get_wtime();
+     //printf("time = %.f (sec)", start);
     Results results = calculation();
     double finish = omp_get_wtime();
-    printf("time = %mail.f (sec)", finish-start);
+    //printf("time =  %.f (sec)", finish);
+    printf("time = %.f (sec)", finish-start);
     print_to_file("result/temp_.txt", results.teta, N);
     print_to_file("result/o2_.txt", results.y[1], N);
     print_to_file("result/h2o_.txt", results.y[2], N);

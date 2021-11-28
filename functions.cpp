@@ -148,7 +148,7 @@ void print_to_file(const char *fname, double array [], int size) {
 }
 
 Results calculation() {
-	omp_set_num_threads(2);
+omp_set_num_threads(8);
 	double teta[N], teta_new[N];//температура T/T_op
 	double y[Mconc][N], y_new[Mconc][N];//концентраци
 	double ck = c_p * gam0;
@@ -236,7 +236,6 @@ Results calculation() {
 		//считаю температуру
 		double c0_ck_T_op=c0 / ck / T_op;
 		double tau_tile=tau / tile;
-		#pragma omp parallel for 
 		for (int i = 1; i < N - 1; i++) {
 			
 			f[0] = c0_ck_T_op * (qp[1] * w1(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i])
@@ -252,12 +251,11 @@ Results calculation() {
 		for (int i = 1; i < N-1; i++) teta[i] = teta_new[i];
 
 		for (int m = 0; m < M; m++) {
-	//		#pragma omp parallel for
+			#pragma omp parallel for
 			for (int i = 1; i < N-1; i++) {
 				y[m][i] = y_new[m][i];
 			}
 		}
-
 		for (int m = 5; m < 10; m++) {
 			for (int i = 1; i < N - 1; i++) {
 				f[5] = ft1(y[9][i], y[5][i], y[6][i], y[1][i], y[7][i], y[8][i], teta[i]);
